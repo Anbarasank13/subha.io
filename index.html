@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="description" content="Build a monthly meal ledger by date range and export it as a PDF.">
-<title>Meal </title>
+<title>Meal Ledger</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -164,37 +164,110 @@
     font-family:'IBM Plex Mono',monospace;
     font-size:12px;
     color:var(--ink-soft);
-    margin-bottom:16px;
+    margin-bottom:14px;
   }
   .chit-progress b{color:var(--ink);}
-  .chit-form{
-    display:grid;
-    grid-template-columns:auto 1fr 1fr auto;
-    gap:14px;
-    align-items:end;
+
+  .cal-legend{
+    display:flex;
+    gap:18px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-bottom:14px;
+    flex-wrap:wrap;
   }
-  .chit-list{margin-top:18px;}
-  .chit{
+  .cal-legend .dot{
+    display:inline-block;
+    width:10px;height:10px;
+    border-radius:2px;
+    margin-right:6px;
+    vertical-align:-1px;
+  }
+  .dot-empty{background:#FFFDF7;border:1px solid var(--line-strong);}
+  .dot-filled{background:#EFE6D2;border:1px solid var(--line-strong);}
+  .dot-selected{background:var(--stamp);border:1px solid var(--stamp-ink);}
+
+  .cal-weekdays{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:5px;
+    margin-bottom:5px;
+  }
+  .cal-weekdays span{
+    text-align:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    color:var(--ink-soft);
+  }
+  .cal-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:5px;
+    margin-bottom:18px;
+  }
+  .cal-cell{
+    position:relative;
+    aspect-ratio:1;
+    min-height:38px;
+    border:1px solid var(--line-strong);
+    background:#FFFDF7;
     display:flex;
     align-items:center;
-    justify-content:space-between;
+    justify-content:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    border-radius:2px;
+    user-select:none;
+    touch-action:manipulation;
+  }
+  .cal-cell.pad{visibility:hidden;cursor:default;border:none;background:none;}
+  .cal-cell.filled{background:#EFE6D2;}
+  .cal-cell.selected{background:var(--stamp);color:#FBF2E9;border-color:var(--stamp-ink);}
+  .cal-cell.anchor{
+    outline:2px solid var(--stamp-ink);
+    outline-offset:-2px;
+    background:var(--brass);
+    color:#FBF2E9;
+  }
+  .cal-cell .qty-badge{
+    position:absolute;
+    bottom:2px;
+    right:3px;
+    font-size:9px;
+    font-weight:600;
+    color:var(--brass);
+  }
+  .cal-cell.selected .qty-badge, .cal-cell.anchor .qty-badge{color:#FBF2E9;}
+
+  .cal-hint{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--brass);
+    margin:-10px 0 14px;
+    min-height:16px;
+  }
+
+  .apply-bar{
+    display:flex;
+    gap:14px;
+    align-items:flex-end;
+    flex-wrap:wrap;
     background:#FFFDF7;
     border:1px dashed var(--line-strong);
+    padding:14px;
     border-radius:2px;
-    padding:9px 14px;
-    margin-bottom:8px;
-    font-family:'IBM Plex Mono',monospace;
-    font-size:13px;
+    margin-bottom:6px;
   }
-  .chit .chit-range{color:var(--ink);font-weight:500;}
-  .chit .chit-qty{color:var(--brass);font-weight:600;}
-  .chit button{
-    padding:4px 10px;
-    font-size:11px;
-    background:transparent;
-    border:1px solid var(--stamp);
-    color:var(--stamp);
-  }
+  .apply-bar .field{flex:1;min-width:160px;}
+  .apply-bar .field label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .apply-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .apply-actions button{padding:10px 12px;font-size:12px;}
+
   .done-banner{
     font-family:'IBM Plex Mono',monospace;
     font-size:13px;
@@ -292,27 +365,27 @@
     .masthead{flex-direction:column;align-items:flex-start;gap:6px;}
     .masthead h1{font-size:22px;}
     .field-row{grid-template-columns:1fr;gap:12px;}
-    .chit-form{grid-template-columns:1fr 1fr;gap:12px;}
     .summary-grid{grid-template-columns:1fr;}
     .step-rail{flex-wrap:wrap;}
     .step-rail span{flex:1;text-align:center;padding:8px 4px;}
     .btn-row{flex-direction:column-reverse;}
     .btn-row button{width:100%;}
-    .chit{flex-wrap:wrap;gap:6px;}
     table.ledger th, table.ledger td{padding:8px 5px;font-size:12px;}
-  }
-  @media (max-width:420px){
-    .chit-form{grid-template-columns:1fr;}
+    .apply-bar{flex-direction:column;align-items:stretch;}
+    .apply-actions{flex-direction:column;}
+    .apply-actions button{width:100%;}
+    .cal-cell{font-size:13px;min-height:34px;}
+    .cal-legend{gap:12px;}
   }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h2 class="sr-only">Meal ledger builder: enter name, month and meal rate, fill daily food counts by date range, then review totals and export a PDF ledger matching the mess-hall chit format.</h2>
+  <h2 class="sr-only">Meal ledger builder: enter name, month and meal rate, tap days on a calendar to set daily food counts in bulk, then review totals and export a PDF ledger matching the mess-hall chit format.</h2>
 
   <div class="masthead">
     <h1>Meal ledger</h1>
-    <div class="tag">Mess Biller</div>
+    <div class="tag">Mess chit builder</div>
   </div>
 
   <div class="step-rail">
@@ -363,34 +436,39 @@
   </div>
 
   <div class="card" id="step2" style="display:none;">
-    <h2>Enter food count by date range</h2>
+    <h2>Tap the days, then set the count</h2>
     <div class="chit-progress" id="chitProgress"></div>
-    <div class="chit-form" id="chitForm">
+    <div class="cal-legend">
+      <span><i class="dot dot-empty"></i>Not set</span>
+      <span><i class="dot dot-filled"></i>Set</span>
+      <span><i class="dot dot-selected"></i>Selected</span>
+    </div>
+    <div class="cal-hint" id="calHint">Tap a day to start a range.</div>
+    <div class="cal-weekdays">
+      <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+
+    <div class="apply-bar">
       <div class="field">
-        <label>From date</label>
-        <input type="text" id="chitStart" readonly>
+        <label for="calQty">Food count for <span id="selCount">0</span> selected day(s)</label>
+        <input type="number" id="calQty" min="0" placeholder="e.g. 7">
       </div>
-      <div class="field">
-        <label for="chitQty">Food count (qty)</label>
-        <input type="number" id="chitQty" min="0" placeholder="e.g. 7">
-      </div>
-      <div class="field">
-        <label for="chitEnd">Applies until date</label>
-        <select id="chitEnd"></select>
-      </div>
-      <div class="field">
-        <label>&nbsp;</label>
-        <button id="addChit">Add range</button>
+      <div class="apply-actions">
+        <button class="secondary" id="cancelAnchor" style="display:none;">Cancel range</button>
+        <button class="secondary" id="selectAllUnfilled">Select all unset</button>
+        <button class="secondary" id="clearSelection">Clear selection</button>
+        <button class="stamp" id="applyQty">Apply</button>
       </div>
     </div>
     <div class="err" id="err2"></div>
-    <div class="chit-list" id="chitList"></div>
+
     <div class="done-banner" id="doneBanner" style="display:none;">
-      All days from 1 to <span id="lastDayLabel"></span> are filled.
+      All days from 1 to <span id="lastDayLabel"></span> are set. Tap any day to change it.
     </div>
     <div class="btn-row">
       <button class="secondary" id="backTo1">Back</button>
-      <button class="secondary" id="resetChits">Clear ranges</button>
+      <button class="secondary" id="resetChits">Clear all</button>
       <button class="stamp" id="toStep3" disabled>Continue to review</button>
     </div>
   </div>
@@ -440,13 +518,15 @@ const MONTH_NAMES=['January','February','March','April','May','June','July','Aug
 const state={
   name:'', month:7, year:new Date().getFullYear(), rate:0,
   daysInMonth:31,
-  ranges:[],
   filled:{},
   oldBalanceSign:'+',
   oldBalance:0
 };
+let selectedDays=new Set();
+let rangeAnchor=null;
 
 function daysInMonth(month,year){ return new Date(year,month,0).getDate(); }
+function firstWeekday(month,year){ return new Date(year,month-1,1).getDay(); }
 
 function fmt2(n){ return '$' + n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function fmt3(n){ return '$' + n.toLocaleString('en-US',{minimumFractionDigits:3,maximumFractionDigits:3}); }
@@ -469,11 +549,11 @@ document.getElementById('toStep2').addEventListener('click',()=>{
   err.textContent='';
   state.name=name; state.rate=rate; state.month=month; state.year=year;
   state.daysInMonth=daysInMonth(month,year);
-  state.ranges=[]; state.filled={};
+  state.filled={};
   document.getElementById('step1').style.display='none';
   document.getElementById('step2').style.display='block';
   showRail(2);
-  initChitForm();
+  initCalendar();
 });
 
 document.getElementById('backTo1').addEventListener('click',()=>{
@@ -482,91 +562,137 @@ document.getElementById('backTo1').addEventListener('click',()=>{
   showRail(1);
 });
 
-function nextUnfilledStart(){
-  for(let d=1; d<=state.daysInMonth; d++){
-    if(!(d in state.filled)) return d;
-  }
-  return null;
-}
-
-function initChitForm(){
+function initCalendar(){
+  selectedDays=new Set();
+  rangeAnchor=null;
   document.getElementById('lastDayLabel').textContent=state.daysInMonth;
-  renderChitForm();
-  renderChitList();
+  renderCalendar();
+  updateProgress();
+  updateHint();
 }
 
-function renderChitForm(){
-  const start=nextUnfilledStart();
-  const form=document.getElementById('chitForm');
-  const done=document.getElementById('doneBanner');
-  const progress=document.getElementById('chitProgress');
-  const filledCount=Object.keys(state.filled).length;
-  progress.innerHTML='Filled <b>'+filledCount+'</b> of <b>'+state.daysInMonth+'</b> days.';
-  if(start===null){
-    form.style.display='none';
-    done.style.display='block';
-    document.getElementById('toStep3').disabled=false;
-    return;
+function renderCalendar(){
+  const grid=document.getElementById('calGrid');
+  grid.innerHTML='';
+  const offset=firstWeekday(state.month,state.year);
+  for(let i=0; i<offset; i++){
+    const pad=document.createElement('div');
+    pad.className='cal-cell pad';
+    grid.appendChild(pad);
   }
-  form.style.display='grid';
-  done.style.display='none';
-  document.getElementById('toStep3').disabled=true;
-  document.getElementById('chitStart').value=start;
-  const endSel=document.getElementById('chitEnd');
-  endSel.innerHTML='';
-  for(let d=start; d<=state.daysInMonth; d++){
-    const opt=document.createElement('option');
-    opt.value=d; opt.textContent=d;
-    if(d===state.daysInMonth) opt.selected=true;
-    endSel.appendChild(opt);
+  for(let d=1; d<=state.daysInMonth; d++){
+    const cell=document.createElement('div');
+    const isFilled = d in state.filled;
+    const isSelected = selectedDays.has(d);
+    const isAnchor = rangeAnchor===d;
+    cell.className='cal-cell'+(isFilled?' filled':'')+(isSelected?' selected':'')+(isAnchor?' anchor':'');
+    cell.setAttribute('role','button');
+    cell.setAttribute('tabindex','0');
+    cell.setAttribute('aria-pressed', isSelected?'true':'false');
+    cell.setAttribute('aria-label','Day '+d+(isFilled?', count '+state.filled[d]:', not set'));
+    cell.dataset.day=d;
+    cell.innerHTML=d + (isFilled ? '<span class="qty-badge">'+state.filled[d]+'</span>' : '');
+    grid.appendChild(cell);
   }
-  document.getElementById('chitQty').value='';
-  document.getElementById('chitQty').focus();
 }
 
-document.getElementById('addChit').addEventListener('click',()=>{
-  const start=parseInt(document.getElementById('chitStart').value,10);
-  const end=parseInt(document.getElementById('chitEnd').value,10);
-  const qty=parseInt(document.getElementById('chitQty').value,10);
-  const err=document.getElementById('err2');
-  if(isNaN(qty) || qty<0){ err.textContent='Enter a valid food count.'; return; }
-  if(isNaN(end) || end<start){ err.textContent='End date must be on or after the start date.'; return; }
-  err.textContent='';
-  state.ranges.push({start,end,qty});
-  for(let d=start; d<=end; d++){ state.filled[d]=qty; }
-  renderChitForm();
-  renderChitList();
+function updateHint(){
+  const hint=document.getElementById('calHint');
+  const cancelBtn=document.getElementById('cancelAnchor');
+  if(rangeAnchor!==null){
+    hint.textContent='Range starts at day '+rangeAnchor+'. Tap the last day (or tap it again for just one day).';
+    cancelBtn.style.display='inline-block';
+  }else{
+    hint.textContent='Tap a day to start a range. Tap a selected day again to remove just that one.';
+    cancelBtn.style.display='none';
+  }
+}
+
+function handleDayTap(d){
+  if(rangeAnchor===null){
+    if(selectedDays.has(d)){
+      selectedDays.delete(d);
+    }else{
+      rangeAnchor=d;
+    }
+  }else{
+    const lo=Math.min(rangeAnchor,d), hi=Math.max(rangeAnchor,d);
+    for(let x=lo; x<=hi; x++){ selectedDays.add(x); }
+    rangeAnchor=null;
+  }
+  renderCalendar();
+  updateHint();
+  document.getElementById('selCount').textContent=selectedDays.size;
+}
+
+document.getElementById('calGrid').addEventListener('click',(e)=>{
+  const cell=e.target.closest('.cal-cell');
+  if(!cell || cell.classList.contains('pad')) return;
+  handleDayTap(parseInt(cell.dataset.day,10));
+});
+document.getElementById('calGrid').addEventListener('keydown',(e)=>{
+  if(e.key!=='Enter' && e.key!==' ') return;
+  const cell=e.target.closest('.cal-cell');
+  if(!cell || cell.classList.contains('pad')) return;
+  e.preventDefault();
+  handleDayTap(parseInt(cell.dataset.day,10));
 });
 
-function renderChitList(){
-  const list=document.getElementById('chitList');
-  list.innerHTML='';
-  state.ranges.forEach((r,i)=>{
-    const div=document.createElement('div');
-    div.className='chit';
-    const rangeLabel = r.start===r.end ? ('Date '+r.start) : ('Date '+r.start+' \u2013 '+r.end);
-    div.innerHTML='<span class="chit-range">'+rangeLabel+'</span>'+
-      '<span class="chit-qty">qty '+r.qty+'</span>'+
-      '<button data-i="'+i+'">Remove</button>';
-    list.appendChild(div);
-  });
-  list.querySelectorAll('button').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const i=parseInt(btn.getAttribute('data-i'),10);
-      const r=state.ranges[i];
-      for(let d=r.start; d<=r.end; d++){ delete state.filled[d]; }
-      state.ranges.splice(i,1);
-      renderChitForm();
-      renderChitList();
-    });
-  });
-}
+document.getElementById('cancelAnchor').addEventListener('click',()=>{
+  rangeAnchor=null;
+  renderCalendar();
+  updateHint();
+});
+
+document.getElementById('applyQty').addEventListener('click',()=>{
+  const err=document.getElementById('err2');
+  const qty=parseInt(document.getElementById('calQty').value,10);
+  if(selectedDays.size===0){ err.textContent='Tap at least one day (or a range) first.'; return; }
+  if(isNaN(qty) || qty<0){ err.textContent='Enter a valid food count.'; return; }
+  err.textContent='';
+  selectedDays.forEach(d=>{ state.filled[d]=qty; });
+  selectedDays=new Set();
+  rangeAnchor=null;
+  document.getElementById('calQty').value='';
+  renderCalendar();
+  updateProgress();
+  updateHint();
+});
+
+document.getElementById('selectAllUnfilled').addEventListener('click',()=>{
+  rangeAnchor=null;
+  for(let d=1; d<=state.daysInMonth; d++){
+    if(!(d in state.filled)) selectedDays.add(d);
+  }
+  renderCalendar();
+  updateHint();
+  document.getElementById('selCount').textContent=selectedDays.size;
+});
+
+document.getElementById('clearSelection').addEventListener('click',()=>{
+  selectedDays=new Set();
+  rangeAnchor=null;
+  renderCalendar();
+  updateHint();
+  document.getElementById('selCount').textContent=0;
+});
 
 document.getElementById('resetChits').addEventListener('click',()=>{
-  state.ranges=[]; state.filled={};
-  renderChitForm();
-  renderChitList();
+  state.filled={}; selectedDays=new Set(); rangeAnchor=null;
+  document.getElementById('err2').textContent='';
+  renderCalendar();
+  updateProgress();
+  updateHint();
 });
+
+function updateProgress(){
+  const filledCount=Object.keys(state.filled).length;
+  document.getElementById('chitProgress').innerHTML='Set <b>'+filledCount+'</b> of <b>'+state.daysInMonth+'</b> days.';
+  document.getElementById('selCount').textContent=selectedDays.size;
+  const allDone = filledCount===state.daysInMonth;
+  document.getElementById('doneBanner').style.display = allDone ? 'block' : 'none';
+  document.getElementById('toStep3').disabled = !allDone;
+}
 
 document.getElementById('toStep3').addEventListener('click',()=>{
   document.getElementById('step2').style.display='none';
@@ -579,8 +705,11 @@ document.getElementById('backTo2').addEventListener('click',()=>{
   document.getElementById('step3').style.display='none';
   document.getElementById('step2').style.display='block';
   showRail(2);
-  renderChitForm();
-  renderChitList();
+  selectedDays=new Set();
+  rangeAnchor=null;
+  renderCalendar();
+  updateProgress();
+  updateHint();
 });
 
 document.getElementById('signPlus').addEventListener('click',()=>{
