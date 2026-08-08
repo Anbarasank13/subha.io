@@ -3,11 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Meal Ledger</title>
+<meta name="theme-color" content="#EFE7D3">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="Build a monthly meal ledger by date range and export it as a PDF.">
+<title>Meal </title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 <style>
   :root{
     --paper:#EFE7D3;
@@ -22,12 +27,14 @@
     --good:#2F6B47;
   }
   *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
   body{
     margin:0;
     background:var(--paper);
     color:var(--ink);
     font-family:'Inter',sans-serif;
     padding:40px 20px 80px;
+    overflow-x:hidden;
   }
   .wrap{max-width:880px;margin:0 auto;}
   .masthead{
@@ -103,12 +110,14 @@
   }
   .field input, .field select{
     font-family:'IBM Plex Mono',monospace;
-    font-size:15px;
-    padding:9px 10px;
+    font-size:16px;
+    padding:10px;
     border:1px solid var(--line-strong);
     background:#FFFDF7;
     color:var(--ink);
     border-radius:2px;
+    width:100%;
+    min-height:44px;
   }
   .field input:focus, .field select:focus{
     outline:2px solid var(--stamp);
@@ -125,6 +134,8 @@
     background:var(--ink);
     color:var(--paper-2);
     cursor:pointer;
+    min-height:44px;
+    touch-action:manipulation;
   }
   button.secondary{
     background:transparent;
@@ -224,9 +235,12 @@
   .ledger-wrap{
     max-height:420px;
     overflow-y:auto;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
     border:1px solid var(--line-strong);
     margin-bottom:18px;
   }
+  .ledger-wrap table.ledger{min-width:480px;}
   .ledger-wrap table.ledger thead th{position:sticky;top:0;z-index:1;}
 
   .summary-grid{
@@ -273,9 +287,22 @@
     overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
   }
   @media (max-width:600px){
-    .field-row{grid-template-columns:1fr;}
-    .chit-form{grid-template-columns:1fr 1fr;}
+    body{padding:20px 12px 60px;}
+    .card{padding:18px 16px;}
+    .masthead{flex-direction:column;align-items:flex-start;gap:6px;}
+    .masthead h1{font-size:22px;}
+    .field-row{grid-template-columns:1fr;gap:12px;}
+    .chit-form{grid-template-columns:1fr 1fr;gap:12px;}
     .summary-grid{grid-template-columns:1fr;}
+    .step-rail{flex-wrap:wrap;}
+    .step-rail span{flex:1;text-align:center;padding:8px 4px;}
+    .btn-row{flex-direction:column-reverse;}
+    .btn-row button{width:100%;}
+    .chit{flex-wrap:wrap;gap:6px;}
+    table.ledger th, table.ledger td{padding:8px 5px;font-size:12px;}
+  }
+  @media (max-width:420px){
+    .chit-form{grid-template-columns:1fr;}
   }
 </style>
 </head>
@@ -285,7 +312,7 @@
 
   <div class="masthead">
     <h1>Meal ledger</h1>
-    <div class="tag">Mess chit builder</div>
+    <div class="tag">Mess Biller</div>
   </div>
 
   <div class="step-rail">
@@ -604,6 +631,10 @@ function renderTotals(){
 }
 
 document.getElementById('saveBtn').addEventListener('click',()=>{
+  if(!window.jspdf || typeof window.jspdf.jsPDF !== 'function'){
+    alert('PDF library did not load. Check your internet connection and try again.');
+    return;
+  }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({unit:'pt',format:'a4'});
   const monthLabel = MONTH_NAMES[state.month-1].slice(0,3)+'-'+String(state.year).slice(-2);
