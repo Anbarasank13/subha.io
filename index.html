@@ -26,7 +26,7 @@
     --brass:#8E6A2F;
     --good:#2F6B47;
   }
-  *{box-sizing:border-box;}
+  *{box-sizing:border-box; font-weight:700 !important;}
   html{-webkit-text-size-adjust:100%;}
   body{
     margin:0;
@@ -184,9 +184,9 @@
     margin-right:6px;
     vertical-align:-1px;
   }
-  .dot-empty{background:#FFFDF7;border:1px solid var(--line-strong);}
-  .dot-filled{background:#EFE6D2;border:1px solid var(--line-strong);}
-  .dot-selected{background:var(--stamp);border:1px solid var(--stamp-ink);}
+  .dot-empty{background:#FCEBEB;border:1px solid #F09595;}
+  .dot-filled{background:#F7C1C1;border:1px solid #E24B4A;}
+  .dot-selected{background:#639922;border:1px solid #27500A;}
 
   .cal-weekdays{
     display:grid;
@@ -226,13 +226,13 @@
     touch-action:manipulation;
   }
   .cal-cell.pad{visibility:hidden;cursor:default;border:none;background:none;}
-  .cal-cell.filled{background:#EFE6D2;}
-  .cal-cell.selected{background:var(--stamp);color:#FBF2E9;border-color:var(--stamp-ink);}
+  .cal-cell{background:#FCEBEB;border-color:#F09595;color:#791F1F;}
+  .cal-cell.filled{background:#F7C1C1;border-color:#E24B4A;color:#791F1F;}
+  .cal-cell.selected{background:#639922;border-color:#3B6D11;color:#EAF3DE;}
   .cal-cell.anchor{
-    outline:2px solid var(--stamp-ink);
-    outline-offset:-2px;
-    background:var(--brass);
-    color:#FBF2E9;
+    background:#639922;
+    border:2px dashed #27500A;
+    color:#EAF3DE;
   }
   .cal-cell .qty-badge{
     position:absolute;
@@ -240,9 +240,9 @@
     right:3px;
     font-size:9px;
     font-weight:600;
-    color:var(--brass);
+    color:#A32D2D;
   }
-  .cal-cell.selected .qty-badge, .cal-cell.anchor .qty-badge{color:#FBF2E9;}
+  .cal-cell.selected .qty-badge, .cal-cell.anchor .qty-badge{color:#EAF3DE;}
 
   .cal-hint{
     font-family:'IBM Plex Mono',monospace;
@@ -439,8 +439,8 @@
     <h2>Tap the days, then set the count</h2>
     <div class="chit-progress" id="chitProgress"></div>
     <div class="cal-legend">
-      <span><i class="dot dot-empty"></i>Not set</span>
-      <span><i class="dot dot-filled"></i>Set</span>
+      <span><i class="dot dot-empty"></i>Not set, not selected</span>
+      <span><i class="dot dot-filled"></i>Set, not selected</span>
       <span><i class="dot dot-selected"></i>Selected</span>
     </div>
     <div class="cal-hint" id="calHint">Tap a day to start a range.</div>
@@ -548,7 +548,7 @@ document.getElementById('toStep2').addEventListener('click',()=>{
   if(isNaN(year) || year<2000 || year>2100){ err.textContent='Enter a valid year.'; return; }
   err.textContent='';
   state.name=name; state.rate=rate; state.month=month; state.year=year;
-  state.daysInMonth=daysInMonth(month,year);
+  state.daysInMonth=Math.min(daysInMonth(month,year), 30);
   state.filled={};
   document.getElementById('step1').style.display='none';
   document.getElementById('step2').style.display='block';
@@ -789,7 +789,7 @@ document.getElementById('saveBtn').addEventListener('click',()=>{
     head:head,
     body:bodyRows,
     theme:'grid',
-    styles:{font:'helvetica',fontSize:9,halign:'center',cellPadding:3,fontStyle:'bold',lineColor:[0,0,0],lineWidth:0.5},
+    styles:{font:'helvetica',fontSize:9,halign:'center',cellPadding:3,lineColor:[0,0,0],lineWidth:0.5},
     headStyles:{fillColor:[255,255,255],textColor:[0,0,0],fontStyle:'bold',lineColor:[0,0,0],lineWidth:0.5},
     margin:{left:45,right:45},
     columnStyles:{0:{cellWidth:84},1:{cellWidth:84},2:{cellWidth:84},3:{cellWidth:84},4:{cellWidth:84},5:{cellWidth:84}}
