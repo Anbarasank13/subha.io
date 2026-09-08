@@ -119,6 +119,22 @@
     width:100%;
     min-height:44px;
   }
+  textarea#pcInput{
+    width:100%;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:16px;
+    padding:12px;
+    border:1px solid var(--line-strong);
+    background:#FFFDF7;
+    color:var(--ink);
+    border-radius:2px;
+    resize:vertical;
+    line-height:1.5;
+  }
+  textarea#pcInput:focus{
+    outline:2px solid var(--stamp);
+    outline-offset:-1px;
+  }
   .field input:focus, .field select:focus{
     outline:2px solid var(--stamp);
     outline-offset:-1px;
@@ -388,13 +404,22 @@
     <div class="tag">Mess chit builder</div>
   </div>
 
-  <div class="step-rail">
+  <div class="step-rail" id="stepRail" style="display:none;">
     <span id="rail-1" class="active">1. Details</span>
     <span id="rail-2">2. Daily count</span>
     <span id="rail-3">3. Review &amp; save</span>
   </div>
 
-  <div class="card" id="step1">
+  <div class="card" id="step0">
+    <h2>How are you filling this in?</h2>
+    <p class="cal-hint" style="margin:-4px 0 14px;">Pick whichever matches how you'll enter the daily counts.</p>
+    <div class="btn-row" style="justify-content:center;flex-wrap:wrap;">
+      <button class="stamp" id="chooseMobile">Mobile &mdash; tap a calendar</button>
+      <button class="stamp" id="choosePc">PC &mdash; paste a list of numbers</button>
+    </div>
+  </div>
+
+  <div class="card" id="step1" style="display:none;">
     <h2>Who is this ledger for</h2>
     <div class="field-row">
       <div class="field">
@@ -431,7 +456,21 @@
     </div>
     <div class="err" id="err1"></div>
     <div class="btn-row">
+      <button class="secondary" id="backTo0">Back</button>
       <button class="stamp" id="toStep2">Continue to daily count</button>
+    </div>
+  </div>
+
+  <div class="card" id="step2pc" style="display:none;">
+    <h2>Paste daily food counts</h2>
+    <p class="cal-hint" style="margin:-4px 0 14px;">
+      Paste up to <b id="pcDayCount">30</b> numbers, one per day in order (day 1 first), separated by spaces, tabs, commas, or line breaks. If you paste fewer than that, the remaining days are automatically set to 0. Day 31 (if this month has one) is never charged, regardless of its count.
+    </p>
+    <textarea id="pcInput" rows="6" placeholder="4  4  5  5  5  5  5  5  5  4  4  4  5  5  5  5  5  5  5  5  5  5  4  4  5  5  5  5  6  6"></textarea>
+    <div class="err" id="errPc"></div>
+    <div class="btn-row">
+      <button class="secondary" id="backTo1FromPc">Back</button>
+      <button class="stamp" id="parsePc">Parse &amp; continue</button>
     </div>
   </div>
 
@@ -520,7 +559,8 @@ const state={
   daysInMonth:31,
   filled:{},
   oldBalanceSign:'+',
-  oldBalance:0
+  oldBalance:0,
+  deviceMode:null
 };
 let selectedDays=new Set();
 let rangeAnchor=null;
@@ -537,6 +577,26 @@ function showRail(n){
   document.getElementById('rail-3').className = n>=3?'active':'';
 }
 
+document.getElementById('chooseMobile').addEventListener('click',()=>{
+  state.deviceMode='mobile';
+  document.getElementById('step0').style.display='none';
+  document.getElementById('step1').style.display='block';
+  document.getElementById('stepRail').style.display='flex';
+  showRail(1);
+});
+document.getElementById('choosePc').addEventListener('click',()=>{
+  state.deviceMode='pc';
+  document.getElementById('step0').style.display='none';
+  document.getElementById('step1').style.display='block';
+  document.getElementById('stepRail').style.display='flex';
+  showRail(1);
+});
+document.getElementById('backTo0').addEventListener('click',()=>{
+  document.getElementById('step1').style.display='none';
+  document.getElementById('step0').style.display='block';
+  document.getElementById('stepRail').style.display='none';
+});
+
 document.getElementById('toStep2').addEventListener('click',()=>{
   const name=document.getElementById('inName').value.trim();
   const rate=parseFloat(document.getElementById('inRate').value);
@@ -551,15 +611,55 @@ document.getElementById('toStep2').addEventListener('click',()=>{
   state.daysInMonth=daysInMonth(month,year);
   state.filled={};
   document.getElementById('step1').style.display='none';
-  document.getElementById('step2').style.display='block';
-  showRail(2);
-  initCalendar();
+
+  if(state.deviceMode==='pc'){
+    document.getElementById('pcDayCount').textContent=state.daysInMonth;
+    document.getElementById('pcInput').value='';
+    document.getElementById('errPc').textContent='';
+    document.getElementById('step2pc').style.display='block';
+    showRail(2);
+  }else{
+    document.getElementById('step2').style.display='block';
+    showRail(2);
+    initCalendar();
+  }
 });
 
 document.getElementById('backTo1').addEventListener('click',()=>{
   document.getElementById('step2').style.display='none';
   document.getElementById('step1').style.display='block';
   showRail(1);
+});
+
+document.getElementById('backTo1FromPc').addEventListener('click',()=>{
+  document.getElementById('step2pc').style.display='none';
+  document.getElementById('step1').style.display='block';
+  showRail(1);
+});
+
+document.getElementById('parsePc').addEventListener('click',()=>{
+  const err=document.getElementById('errPc');
+  const raw=document.getElementById('pcInput').value.trim();
+  if(!raw){ err.textContent='Paste the daily counts first.'; return; }
+  const parts=raw.split(/[\s,]+/).filter(p=>p.length>0);
+  const values=parts.map(p=>Number(p));
+  if(values.some(v=>isNaN(v) || v<0 || !Number.isInteger(v))){
+    err.textContent='Only whole numbers, separated by spaces/commas/line breaks, please.';
+    return;
+  }
+  if(values.length > state.daysInMonth){
+    err.textContent='Found '+values.length+' numbers, but this month only has '+state.daysInMonth+' days. Please trim the extra ones.';
+    return;
+  }
+  err.textContent='';
+  state.filled={};
+  for(let d=1; d<=state.daysInMonth; d++){
+    state.filled[d] = (d<=values.length) ? values[d-1] : 0;
+  }
+  document.getElementById('step2pc').style.display='none';
+  document.getElementById('step3').style.display='block';
+  showRail(3);
+  renderLedger();
 });
 
 function initCalendar(){
@@ -703,13 +803,17 @@ document.getElementById('toStep3').addEventListener('click',()=>{
 
 document.getElementById('backTo2').addEventListener('click',()=>{
   document.getElementById('step3').style.display='none';
-  document.getElementById('step2').style.display='block';
   showRail(2);
-  selectedDays=new Set();
-  rangeAnchor=null;
-  renderCalendar();
-  updateProgress();
-  updateHint();
+  if(state.deviceMode==='pc'){
+    document.getElementById('step2pc').style.display='block';
+  }else{
+    document.getElementById('step2').style.display='block';
+    selectedDays=new Set();
+    rangeAnchor=null;
+    renderCalendar();
+    updateProgress();
+    updateHint();
+  }
 });
 
 document.getElementById('signPlus').addEventListener('click',()=>{
