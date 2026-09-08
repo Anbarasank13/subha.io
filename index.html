@@ -741,7 +741,7 @@ function renderLedger(){
     ledgerRows.push({date:d,qty,amount,totalAmt});
     const tr=document.createElement('tr');
     tr.innerHTML='<td>'+d+'</td><td>'+qty+'</td><td>'+qty+'</td><td>'+qty+'</td>'+
-      '<td>'+(chargeable ? fmt2(amount) : '\u2014')+'</td><td>'+(chargeable ? fmt3(totalAmt) : '\u2014')+'</td>';
+      '<td>'+fmt2(amount)+'</td><td>'+fmt3(totalAmt)+'</td>';
     body.appendChild(tr);
   }
   renderTotals();
@@ -776,9 +776,7 @@ document.getElementById('saveBtn').addEventListener('click',()=>{
 
   const head = [['Date','Break fast','Dinner','Total','Amt','Total amt']];
   const bodyRows = ledgerRows.map(r=>[
-    String(r.date), String(r.qty), String(r.qty), String(r.qty),
-    r.date<=30 ? fmt2(r.amount) : '\u2014',
-    r.date<=30 ? fmt3(r.totalAmt) : '\u2014'
+    String(r.date), String(r.qty), String(r.qty), String(r.qty), fmt2(r.amount), fmt3(r.totalAmt)
   ]);
 
   doc.setFont('helvetica','bold');
