@@ -548,7 +548,7 @@ document.getElementById('toStep2').addEventListener('click',()=>{
   if(isNaN(year) || year<2000 || year>2100){ err.textContent='Enter a valid year.'; return; }
   err.textContent='';
   state.name=name; state.rate=rate; state.month=month; state.year=year;
-  state.daysInMonth=Math.min(daysInMonth(month,year), 30);
+  state.daysInMonth=daysInMonth(month,year);
   state.filled={};
   document.getElementById('step1').style.display='none';
   document.getElementById('step2').style.display='block';
@@ -729,17 +729,19 @@ document.getElementById('inOldBalance').addEventListener('input',renderTotals);
 let ledgerRows=[];
 
 function renderLedger(){
-  const amount = state.rate/30;
+  const baseAmount = state.rate/30;
   ledgerRows=[];
   const body=document.getElementById('ledgerBody');
   body.innerHTML='';
   for(let d=1; d<=state.daysInMonth; d++){
     const qty = state.filled[d] || 0;
+    const chargeable = d<=30;
+    const amount = chargeable ? baseAmount : 0;
     const totalAmt = amount*qty;
     ledgerRows.push({date:d,qty,amount,totalAmt});
     const tr=document.createElement('tr');
     tr.innerHTML='<td>'+d+'</td><td>'+qty+'</td><td>'+qty+'</td><td>'+qty+'</td>'+
-      '<td>'+fmt2(amount)+'</td><td>'+fmt3(totalAmt)+'</td>';
+      '<td>'+(chargeable ? fmt2(amount) : '\u2014')+'</td><td>'+(chargeable ? fmt3(totalAmt) : '\u2014')+'</td>';
     body.appendChild(tr);
   }
   renderTotals();
@@ -774,7 +776,9 @@ document.getElementById('saveBtn').addEventListener('click',()=>{
 
   const head = [['Date','Break fast','Dinner','Total','Amt','Total amt']];
   const bodyRows = ledgerRows.map(r=>[
-    String(r.date), String(r.qty), String(r.qty), String(r.qty), fmt2(r.amount), fmt3(r.totalAmt)
+    String(r.date), String(r.qty), String(r.qty), String(r.qty),
+    r.date<=30 ? fmt2(r.amount) : '\u2014',
+    r.date<=30 ? fmt3(r.totalAmt) : '\u2014'
   ]);
 
   doc.setFont('helvetica','bold');
